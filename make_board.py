@@ -1,6 +1,7 @@
 import numpy as np
 import cv2.aruco
 
+# all aruco patterns
 ARUCO_DICT = {
 	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
 	"DICT_4X4_100": cv2.aruco.DICT_4X4_100,
@@ -23,10 +24,13 @@ ARUCO_DICT = {
 	"DICT_APRILTAG_25h9": cv2.aruco.DICT_APRILTAG_25h9,
 	"DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
 	"DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
+	# need an all black pattern
+	# need way to give patterns white border
 }
 
+# generate tag
 aruco_type = "DICT_5X5_250"
-id = 1
+id = 1 # helpful if we want to generate multiple of the same pattern
 
 arucoDict = cv2.aruco.Dictionary_get(ARUCO_DICT[aruco_type])
 
@@ -35,14 +39,21 @@ tag_size = 250
 tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
 cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
 
-# Save the tag g
-# enerated
+# save tag
 tag_name = "arucoMarkers/" + aruco_type + "_" + str(id) + ".png"
 cv2.imwrite(tag_name, tag)
 cv2.imshow("ArUCo Tag", tag)
 
 cv2.waitKey(0)
 
+cv2.destroyAllWindows()
+
+def make_board():
+	# put together pattern featured on board in specific video
+
+
+
+# alternate way to make board
 '''
 array(['../../data/calib_tel_ludo/VID_20180406_085421_0.png',
            '../../data/calib_tel_ludo/VID_20180406_085421_5.png',
