@@ -1,8 +1,8 @@
-def make_frames('''video'''):
+def make_frames(video):
     # open avi
-    video = cv2.VideoCapture('''avi directory''') # this might be skilled reaching videos
+    video = cv2.VideoCapture(video_directory) # this might be skilled reaching videos
     # make directory for frames
-    os.makedirs('''frames directory''')
+    os.makedirs(frames_directory)
     # make sure it's an avi
     if not video.lower().endswith('.avi'):
         exit()
@@ -17,7 +17,7 @@ def make_frames('''video'''):
         if not ret:
             break
         # save frame as pngs
-        filename = os.path.join('''frames directory''', f'frame{count:04d}.png')
+        filename = os.path.join(frames_directory, f'frame{count:04d}.png')
         cv2.imwrite(filename, frame)
         # add frame to array
         frames.append(frame)
