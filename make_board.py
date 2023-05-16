@@ -1,5 +1,9 @@
 import numpy as np
-import cv2.aruco
+import cv2
+#import cv2.aruco
+#from cv2 import aruco
+#from .cv2 import cv2
+#__all__ = ["aruco"]
 
 # all aruco patterns
 ARUCO_DICT = {
@@ -28,21 +32,25 @@ ARUCO_DICT = {
 	# need way to give patterns white border
 }
 
-# generate tag
-aruco_type = "DICT_5X5_250"
-id = 1 # helpful if we want to generate multiple of the same pattern
+if __name__ == '__main__':
 
-arucoDict = cv2.aruco.Dictionary_get(ARUCO_DICT[aruco_type])
+    #print('hi')
+	# generate tag
+	aruco_type = "DICT_5X5_250"
+	id = 1  # helpful if we want to generate multiple of the same pattern
 
-print("ArUCo type '{}' with ID '{}'".format(aruco_type, id))
-tag_size = 250
-tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
-cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
+	arucoDict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT[aruco_type])
 
-# save tag
-tag_name = "arucoMarkers/" + aruco_type + "_" + str(id) + ".png"
-cv2.imwrite(tag_name, tag)
-cv2.imshow("ArUCo Tag", tag)
+	print("ArUCo type '{}' with ID '{}'".format(aruco_type, id))
+	tag_size = 250
+	tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
+	cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
+	#cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
+
+	# save tag
+	tag_name = "arucoMarkers/" + aruco_type + "_" + str(id) + ".png"
+	cv2.imwrite(tag_name, tag)
+	cv2.imshow("ArUCo Tag", tag)
 
 cv2.waitKey(0)
 
