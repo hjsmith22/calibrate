@@ -1,9 +1,13 @@
+# dictionary = aruco.Dictionary_get(aruco.DICT_4X4_50)
+	# dictionary = cv2.aruco.getPredefinedDictionary(ARUCO_DICT[marker_type])
+	# marker = aruco.drawMarker(dictionary, id, marker_size, image)
+
+	# image[border_size:marker_size + border_size, border_size:marker_size + border_size] = marker
+
 import numpy as np
 import cv2
-#import cv2.aruco
-#from cv2 import aruco
-#from .cv2 import cv2
-#__all__ = ["aruco"]
+import cv2.aruco as aruco
+import matplotlib.pyplot as plt
 
 # all aruco patterns
 ARUCO_DICT = {
@@ -34,31 +38,86 @@ ARUCO_DICT = {
 
 if __name__ == '__main__':
 
-    #print('hi')
-	# generate tag
-	aruco_type = "DICT_5X5_250"
-	id = 1  # helpful if we want to generate multiple of the same pattern
+	marker_type = "DICT_5X5_250"
+	marker_id = 10
+	marker_size = 300
+	# border_size = 100
+	image_size = marker_size + 2  # * border_size
+	image = np.ones((image_size, image_size), dtype=np.uint8) * 255  # 255 creates a white background
 
-	arucoDict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT[aruco_type])
+	grid_size = marker_size // 12
+	step_size = grid_size // 2
 
-	print("ArUCo type '{}' with ID '{}'".format(aruco_type, id))
-	tag_size = 250
-	tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
-	cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
-	#cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
+	# 1 is black 0 is white
+	dict_6x6_250 = [
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+		[1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
+		[1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1],
+		[1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1],
+		[1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1],
+		[1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	]
 
-	# save tag
-	tag_name = "arucoMarkers/" + aruco_type + "_" + str(id) + ".png"
-	cv2.imwrite(tag_name, tag)
-	cv2.imshow("ArUCo Tag", tag)
+	black = [
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	]
 
-cv2.waitKey(0)
+	charuco = [
+		[dict_6x6_250, black, 0, black, 0, black, 0, black, 0, black],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 
-cv2.destroyAllWindows()
+	]
 
-def make_board():
-	# put together pattern featured on board in specific video
+	for i in range(10):
+		for j in range(8):
+			for k in range(12):
+				for l in range(12):
+					x = (k * grid_size) + step_size
+					y = (l * grid_size) + step_size
+					if dict_6x6_250[l][k] == 0:
+						cv2.rectangle(image, (x - step_size, y - step_size), (x + step_size, y + step_size), 0, -1)
 
+
+
+
+
+	# draw marker_id in the center
+	# font = cv2.FONT_HERSHEY_SIMPLEX
+	# text = str(marker_id)
+	# text_size = cv2.getTextSize(text, font, 1, 2)[0]
+	# text_x = (image_size - text_size[0]) // 2
+	# text_y = (image_size + text_size[1]) // 2
+	# cv2.putText(image, text, (text_x, text_y), font, 1, 0, 2, cv2.LINE_AA)
+
+	combined = [image, black]
+
+	# display or save the generated marker
+	cv2.imshow('DICT_6X6_250', image)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 
 
 # alternate way to make board
