@@ -23,7 +23,6 @@ ARUCO_DICT = {
 	"DICT_APRILTAG_25h9": cv2.aruco.DICT_APRILTAG_25h9,
 	"DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
 	"DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
-	# need an all black pattern
 }
 
 def id2marker(marker_id):
