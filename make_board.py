@@ -1,15 +1,6 @@
-# dictionary = aruco.Dictionary_get(aruco.DICT_4X4_50)
-	# dictionary = cv2.aruco.getPredefinedDictionary(ARUCO_DICT[marker_type])
-	# marker = aruco.drawMarker(dictionary, id, marker_size, image)
-
-	# image[border_size:marker_size + border_size, border_size:marker_size + border_size] = marker
-
 import numpy as np
-import cv2
-import cv2.aruco as aruco
-import matplotlib.pyplot as plt
+import cv2.aruco
 
-# all aruco patterns
 ARUCO_DICT = {
 	"DICT_4X4_50": cv2.aruco.DICT_4X4_50,
 	"DICT_4X4_100": cv2.aruco.DICT_4X4_100,
@@ -33,38 +24,36 @@ ARUCO_DICT = {
 	"DICT_APRILTAG_36h10": cv2.aruco.DICT_APRILTAG_36h10,
 	"DICT_APRILTAG_36h11": cv2.aruco.DICT_APRILTAG_36h11
 	# need an all black pattern
-	# need way to give patterns white border
 }
 
-if __name__ == '__main__':
+def id2marker(marker_id):
+	for key, val in aruco_dictionary.items():
+		if val == marker_id:
+			return key
+	return None
 
-	marker_type = "DICT_5X5_250"
-	marker_id = 10
-	marker_size = 300
-	# border_size = 100
-	image_size = marker_size + 2  # * border_size
-	image = np.ones((image_size, image_size), dtype=np.uint8) * 255  # 255 creates a white background
+def add_border(marker):
+	marker_with_border = np.ones((12, 12))
+	for i in range(12):
+		for j in range(12):
+			if 3 <= i and i <= 9 and 3 <= j and j <= 9:
+				val1 = marker_with_border[i, j]
+				val2 = marker[i - 3, j - 3]
+				marker_with_border[i, j] = marker[i - 3, j - 3]
+	return marker_with_border
 
-	grid_size = marker_size // 12
-	step_size = grid_size // 2
+charuco = [
+		[0, -1, 1, -1, 2, -1, 3, -1, 4, -1],
+		[-1, 5, -1, 6, -1, 7, -1, 8, -1, 9],
+		[10, -1, 11, -1, 12, -1, 13, -1, 14, -1],
+		[-1, 15, -1, 16, -1, 17, -1, 18, -1, 19],
+		[20, -1, 21, -1, 22, -1, 23, -1, 24, -1],
+		[-1, 25, -1, 26, -1, 27, -1, 28, -1, 29],
+		[30, -1, 31, -1, 32, -1, 33, -1, 34, -1],
+		[-1, 35, -1, 37, -1, 38, -1, 39, -1, 40]
+	] # -1 is black
 
-	# 1 is black 0 is white
-	dict_6x6_250 = [
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-		[1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-		[1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1],
-		[1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1],
-		[1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1],
-		[1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-		[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	]
-
-	black = [
+black = [
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -79,109 +68,45 @@ if __name__ == '__main__':
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	]
 
-	charuco = [
-		[dict_6x6_250, black, 0, black, 0, black, 0, black, 0, black],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-
-	]
-
-	for i in range(10):
-		for j in range(8):
+def make_board(marker_size):
+	image_size = marker_size + 2  # * border_size
+	image = np.ones((image_size, image_size), dtype=np.uint8) * 255  # 255 creates a white background
+	grid_size = marker_size // 24
+	step_size = grid_size // 2
+	for i in range(8): # charuco rows
+		for j in range(10): # charuco cols
+			pattern = charuco[j][i]
+			if pattern == '-1':
+				pattern = black
+			else:
+				pattern = id2marker(pattern)
+			pattern = add_border(pattern)
 			for k in range(12):
 				for l in range(12):
 					x = (k * grid_size) + step_size
 					y = (l * grid_size) + step_size
-					if dict_6x6_250[l][k] == 0:
+					if pattern[l][k] == 0:
 						cv2.rectangle(image, (x - step_size, y - step_size), (x + step_size, y + step_size), 0, -1)
-
-
-
-
-
-	# draw marker_id in the center
-	# font = cv2.FONT_HERSHEY_SIMPLEX
-	# text = str(marker_id)
-	# text_size = cv2.getTextSize(text, font, 1, 2)[0]
-	# text_x = (image_size - text_size[0]) // 2
-	# text_y = (image_size + text_size[1]) // 2
-	# cv2.putText(image, text, (text_x, text_y), font, 1, 0, 2, cv2.LINE_AA)
-
-	combined = [image, black]
-
-	# display or save the generated marker
-	cv2.imshow('DICT_6X6_250', image)
+	cv2.imshow('ChArUco', image)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
+# generate tag
+aruco_type = "DICT_5X5_250"
+id = 1 # helpful if we want to generate multiple of the same pattern
 
-# alternate way to make board
-'''
-array(['../../data/calib_tel_ludo/VID_20180406_085421_0.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_5.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_10.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_15.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_20.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_25.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_30.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_35.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_40.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_45.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_50.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_55.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_60.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_65.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_70.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_75.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_80.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_85.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_90.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_95.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_100.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_105.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_110.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_115.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_120.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_125.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_130.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_135.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_140.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_145.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_150.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_155.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_160.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_165.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_170.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_175.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_180.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_185.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_190.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_195.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_200.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_205.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_210.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_215.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_220.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_225.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_230.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_235.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_240.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_245.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_250.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_255.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_260.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_265.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_270.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_275.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_280.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_285.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_290.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_295.png',
-           '../../data/calib_tel_ludo/VID_20180406_085421_300.png'],
-          dtype='<U53')
-'''
+arucoDict = cv2.aruco.Dictionary_get(aruco_dictionary[aruco_type])
+
+print("ArUCo type '{}' with ID '{}'".format(aruco_type, id))
+tag_size = 250
+tag = np.zeros((tag_size, tag_size, 1), dtype="uint8")
+cv2.aruco.drawMarker(arucoDict, id, tag_size, tag, 1)
+
+# save tag
+tag_name = "arucoMarkers/" + aruco_type + "_" + str(id) + ".png"
+cv2.imwrite(tag_name, tag)
+cv2.imshow("ArUCo Tag", tag)
+
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
