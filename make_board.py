@@ -91,10 +91,10 @@ def make_board(marker_size):
 	cv2.destroyAllWindows()
 
 # generate tag
-aruco_type = "DICT_5X5_250"
+aruco_type = "DICT_6X6_250"
 id = 1 # helpful if we want to generate multiple of the same pattern
 
-arucoDict = cv2.aruco.Dictionary_get(aruco_dictionary[aruco_type])
+aruco_dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
 
 print("ArUCo type '{}' with ID '{}'".format(aruco_type, id))
 tag_size = 250
