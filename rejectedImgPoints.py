@@ -1,8 +1,10 @@
 # plots the rejected points on a frame
 
-rejectedImgPoints_x = []
+def plot_rejected(rejectedImgPoints, gray):
+        
+        rejectedImgPoints_x = []
         rejectedImgPoints_y = []
-
+        
         for i in range(len(rejectedImgPoints)):
             temp_group = rejectedImgPoints[i]
             for j in range(len(temp_group)):
