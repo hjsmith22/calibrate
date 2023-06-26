@@ -3,7 +3,7 @@
 rejectedImgPoints_x = []
 rejectedImgPoints_y = []
 framenum = 0
-vidname = "ridCalibration_box01_20230608_15-45-02_direct_700-1350-270-935.avi"
+vidname = "ridCalibration_box01_20230608_15-51-56_leftmirror_1-470-270-920_flipped.avi"
 good_frames = [5, 6, 7, 8, 9, 10, 12, 13, 16, 17, 18, 19, 20, 22, 24, 25, 28, 29, 30, 32, 80, 83, 84, 85, 86,
                87, 88, 89, 90, 100, 103, 104, 107, 111, 112, 113, 115, 121]
 
