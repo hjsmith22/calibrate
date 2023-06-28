@@ -1,30 +1,19 @@
 import numpy as np
-import cv2
-import os
 from aniposelib.boards import CharucoBoard, Checkerboard
 from aniposelib.cameras import Camera, CameraGroup
 from aniposelib.utils import load_pose2d_fnames
+
 import matplotlib.pyplot as plt
-# % matplotlib notebook
 from matplotlib.pyplot import get_cmap
-# %matplotlib notebook
-
-import glob
 import os
-# from moviepy.editor import *
-import subprocess
-import cv2
-import shutil
-import pandas as pd
 from datetime import datetime
-from tqdm import tqdm
 
-import skilled_reaching_calibration
-import navigation_utilities
+import crop_videos
+import skilled_reaching_io
 
 def connect(ax, points, bps, bp_dict, color):
     ixs = [bp_dict[bp] for bp in bps]
-    return ax.plot(points[ixs, 0], points[ixs, 1], points[ixs, 2], color=color)
+    return ax.plot(points[ixs, 0], -points[ixs, 1], points[ixs, 2], color=color)
 
 def connect_all(ax, points, scheme, bodyparts, cmap=None):
     if cmap is None:
@@ -36,131 +25,86 @@ def connect_all(ax, points, scheme, bodyparts, cmap=None):
         lines.append(line)
     return lines
 
-def crop_video(vid_path_in, vid_path_out, crop_params, view_name, filtertype='mjpeg2jpeg'):
-
-    # crop videos losslessly. Note that the trick of converting the video into a series of jpegs, cropping them, and
-    # re-encoding is a trick that only works because our videos are encoded as mjpegs (which apparently is an old format)
-
-    x1, x2, y1, y2 = [int(cp) for cp in crop_params]
-    w = x2 - x1 + 1
-    h = y2 - y1 + 1
-    vid_root, vid_name = os.path.split(vid_path_out)
-
-    print('cropping {}'.format(vid_name))
-
-    if filtertype == 'mjpeg2jpeg':
-        jpg_temp_folder = os.path.join(vid_root, 'temp')
-
-        # if path already exists, delete the old temp folder. Either way, make a new one.
-        if os.path.isdir(jpg_temp_folder):
-            shutil.rmtree(jpg_temp_folder)
-        os.mkdir(jpg_temp_folder)
-
-        full_jpg_path = os.path.join(jpg_temp_folder, 'frame_%d.jpg')
-        # full_jpg_crop_path = os.path.join(jpg_temp_folder, 'frame_crop_%d.jpg')
-        command = (
-            f"ffmpeg -i {vid_path_in} "
-            f"-c:v copy -bsf:v mjpeg2jpeg {full_jpg_path} "
-        )
-        subprocess.call(command, shell=True)
-
-        # find the list of jpg frames that were just made, crop them, and resave them
-        jpg_list = glob.glob(os.path.join(jpg_temp_folder, '*.jpg'))
-        for jpg_name in tqdm(jpg_list):
-            img = cv2.imread(jpg_name)
-            cropped_img = img[y1-1:y2-1, x1-1:x2-1, :]
-            if view_name == 'rightmirror':
-                # flip the image left to right so it can be run through a single "side mirror" DLC network
-                cropped_img = cv2.flip(cropped_img, 1)   # 2nd argument flipCode > 0 indicates flip horizontally
-            cv2.imwrite(jpg_name, cropped_img)
-
-        # turn the cropped jpegs into a new movie
-        command = (
-            f"ffmpeg -i {full_jpg_path} "
-            f"-c:v copy {vid_path_out}"
-        )
-        subprocess.call(command, shell=True)
-
-        # destroy the temp jpeg folder
-        shutil.rmtree(jpg_temp_folder)
-    elif filtertype == 'h264':
-        command = (
-            f"ffmpeg -n -i {vid_path_in} "
-            f"-filter:v crop={w}:{h}:{x1}:{y1} "
-            f"-c:v h264 -c:a copy {vid_path_out}"
-        )
-        subprocess.call(command, shell=True)
+# def calibrate():
 
 if __name__ == '__main__':
 
-    # vid_path = r'C:\Users\haydenjs\Desktop\overhead_calibration_videos'
-    vid_path = r'C:\Users\haydenjs\Desktop'
-    # vid_path_out = r'C:\Users\haydenjs\Desktop'
-    # vid_path = r'C:\Users\haydenjs\Documents\hand-demo\2019-08-02\calibration\bak-charuco'
+    video_root_folder = r'C:\Users\haydenjs\Desktop'
+    crop_params_csv_path = os.path.join(video_root_folder, 'SR_video_crop_regions.csv')
+    crop_params_df = skilled_reaching_io.read_crop_params_csv(crop_params_csv_path)
+    session_date_string = '20230608'  # 06/08/2023
+    session_date = datetime.strptime(session_date_string, '%Y%m%d')
+    box_num = 1
 
-    vidnames = [['cam00_sr_overhead.mov'],
-                ['cam01_sr_overhead.mov']]
+    view_list = ['direct', 'leftmirror', 'rightmirror']
+    crop_params_dict = {
+        view_list[0]: [700, 1350, 270, 935],
+        view_list[1]: [1, 470, 270, 920],
+        view_list[2]: [1570, 2040, 270, 920]
+    }
 
-    # anipose
-    # vidnames = [['calib-charuco-camA.MOV'],
-                # ['calib-charuco-camB.MOV'],
-                # ['calib-charuco-camC.MOV']]
+    crop_params_dict = crop_videos.crop_params_dict_from_df(crop_params_df, session_date, box_num, view_list)
 
-    # skilled reaching front
-    # vid_path = 'C:\Users\haydenjs\Desktop
-    # nothing
+    # crop_videos.crop_folders(video_folder_list, cropped_vids_parent, crop_params_dict, view_list, vidtype='avi', filtertype='mjpeg2jpeg')
 
-    # skilled reaching overhead (R0452)
-    # vid_path = 'C:\Users\haydenjs\Desktop
-    # cam 00, 'cam00_sr_overhead.mov', 0/199
-    # cam 01, 'cam01_sr_overhead.mov', 0/230
-    # cam 02, 'cam02_sr_overhead.mov', 2/234
-    # cam 03, 'cam03_sr_overhead.mov', 25/218
+    dest_folder = r'C:\Users\haydenjs\Desktop\cropped_calibration_samples_for_Hayden'
 
-    # pavlovian overhead
-    # vid_path = 'C:\Users\haydenjs\Desktop\overhead_calibration_videos'
-    # cam 00, 'cam00_pav_overhead.mov', 93/195
-    # cam 01, 'cam01_pav_overhead.mov', 3/204
-    # cam 02, 'cam02_pav_overhead.mov', 141/180
-    # cam 03, 'cam03_pav_overhead.mov', 160/170
+    vid_path_in = r'C:\Users\haydenjs\Desktop\calibration_samples_for_Hayden'
 
+    vids = [vid for vid in os.listdir(r'C:\Users\haydenjs\Desktop\calibration_samples_for_Hayden') if
+            os.path.isfile(os.path.join(r'C:\Users\haydenjs\Desktop\calibration_samples_for_Hayden', vid))]
+    vidnames = []
+    for vid in vids:
+        vidnames.append(vid)
 
+    for i in range(len(vids)):
+        vid_path_in = r'C:\Users\haydenjs\Desktop\calibration_samples_for_Hayden\''
+        vid_path_in = vid_path_in[:-1] + vidnames[i]
+        full_vid_path = vid_path_in
+        for j in range(3):
+            view_name = view_list[j]
+            crop_params = crop_params_dict[view_name]
+            vid_path_out = crop_videos.cropped_vid_name(full_vid_path, dest_folder, view_name, crop_params)
+            crop_videos.crop_video(vid_path_in, vid_path_out, crop_params, view_name, filtertype='h264')
 
-    vidnames = [[os.path.join(vid_path, vn[0])] for vn in vidnames]
-
-    # vidnames_out = [['GridCalibration_box01_20230313_12-55-56_cropped.avi'],
-                    # ['GridCalibration_box01_20230313_12-55-56_cropped.avi'],
-                    # ['GridCalibration_box01_20230313_12-55-56_cropped.avi']]
-
-    # vidnames_out = [[os.path.join(vid_path_out, vn[0])] for vn in vidnames_out]
-
-    crop_params = [680,  # left
-                   1360,  # right
-                   0,  # top
-                   1080  # bottom
-                   ]
-
-    # crop_video(vidnames[0][0], vidnames[0][0], crop_params, view_name="direct", filtertype='mjpeg2jpeg')
-    # crop_video(vidnames[1][0], vidnames[1][0], crop_params, view_name="direct", filtertype='mjpeg2jpeg')
-    # crop_video(vidnames[2][0], vidnames[2][0], crop_params, view_name="direct", filtertype='mjpeg2jpeg')
+    cropped_vids = [cropped_vid for cropped_vid in
+                    os.listdir(r'C:\Users\haydenjs\Desktop\cropped_calibration_samples_for_Hayden') if
+                    os.path.isfile(
+                        os.path.join(r'C:\Users\haydenjs\Desktop\cropped_calibration_samples_for_Hayden', cropped_vid))]
+    cropped_vidnames = []
+    leftmirror = 'leftmirror'
+    rightmirror = 'rightmirror'
+    flipped = 'flipped'
+    for cropped_vid in cropped_vids:
+        if leftmirror in cropped_vid and flipped not in cropped_vid:
+            continue
+        elif rightmirror in cropped_vid and flipped not in cropped_vid:
+            continue
+        cropped_vid = [cropped_vid]
+        cropped_vidnames.append(cropped_vid)
+    cropped_vid_path_in = r'C:\Users\haydenjs\Desktop\cropped_calibration_samples_for_Hayden'
+    cropped_vidnames = [[os.path.join(cropped_vid_path_in, vn[0])] for vn in cropped_vidnames]
 
     cam_names = ['A', 'B', 'C']
 
     n_cams = len(vidnames)
 
-    board = CharucoBoard(7, 10,
-                         square_length=25,  # here, in mm but any unit works
-                         marker_length=18.75,
+    # 7x10 board: (7, 10, square_length=7.5, marker_length=5.625, marker_bits=4, dict_size=50)
+    # 4x5 board: (4, 5, square_length=10, marker_length=7.5, marker_bits=4, dict_size=50)
+
+    board = CharucoBoard(4, 5,
+                         square_length=7.5,  # here, in mm but any unit works
+                         marker_length=5.625,
                          marker_bits=4, dict_size=50)
 
-    # the videos provided are fisheye, so we need the fisheye option
+    # the videos provided are fisheye, so we need the fisheye option # ours are not fisheye
     cgroup = CameraGroup.from_names(cam_names, fisheye=True)
 
     # this will take about 15 minutes (mostly due to detection)
     # it will detect the charuco board in the videos,
     # then calibrate the cameras based on the detections, using iterative bundle adjustment
-    cgroup.calibrate_videos(vidnames, board)
     # cgroup.calibrate_videos(vidnames, board)
+    cgroup.calibrate_videos(cropped_vidnames, board)
 
     # if you need to save and load
     # example saving and loading for later
@@ -230,3 +174,40 @@ if __name__ == '__main__':
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(p3d[:, 0], p3d[:, 1], p3d[:, 2], c='black', s=100)
     connect_all(ax, p3d, scheme, bodyparts)
+
+    # anipose
+    # vidnames = [['calib-charuco-camA.MOV'],
+    # ['calib-charuco-camB.MOV'],
+    # ['calib-charuco-camC.MOV']]
+
+    # skilled reaching front
+    # vid_path = 'C:\Users\haydenjs\Desktop
+    # nothing
+
+    # skilled reaching overhead (R0452)
+    # vid_path = 'C:\Users\haydenjs\Desktop
+    # cam 00, 'cam00_sr_overhead.mov', 0/199
+    # cam 01, 'cam01_sr_overhead.mov', 0/230
+    # cam 02, 'cam02_sr_overhead.mov', 2/234
+    # cam 03, 'cam03_sr_overhead.mov', 25/218
+
+    # pavlovian overhead
+    # vid_path = 'C:\Users\haydenjs\Desktop\overhead_calibration_videos'
+    # cam 00, 'cam00_pav_overhead.mov', 93/195
+    # cam 01, 'cam01_pav_overhead.mov', 3/204
+    # cam 02, 'cam02_pav_overhead.mov', 141/180
+    # cam 03, 'cam03_pav_overhead.mov', 160/170
+
+    # my front videos
+    # vid_path = 'C:\Users\haydenjs\Desktop\calibration_samples_for_Hayden'
+    # 'hayden_front_1.avi', 220/400
+    # 'hayden_front_1_left.mov', 0
+    # 'hayden_front_1_center.mov', 10
+    # 'hayden_front_1_right.mov', 0
+
+    # 'hayden_front_2.avi', 288/400
+    # 'hayden_front_2_left.mov', 0
+    # 'hayden_front_2_center.mov', 77
+    # 'hayden_front_2_right.mov', 0
+
+    # 'hayden_front_3.avi', 0/400
