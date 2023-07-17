@@ -59,3 +59,16 @@ video_root_folder = r'C:\Users\haydenjs\Desktop'
         cropped_vidnames.append(cropped_vid)
     cropped_vid_path_in = r'C:\Users\haydenjs\Desktop\cropped_calibration_samples_for_Hayden'
     cropped_vidnames = [[os.path.join(cropped_vid_path_in, vn[0])] for vn in cropped_vidnames]
+
+# to put at bottom of Dan's crop_videos.py
+
+    if view_name != 'direct':
+        # flip the video we just wrote out horizontally, give it a new name with "_flipped" at the end
+        # temporarily removes the video's file extension
+        flipped_vid_path_out = vid_path_out.rsplit(".", 1)[0] + '_flipped.avi'
+        hflip_command = (
+            f"ffmpeg -i {vid_path_out} "
+            f"-vf hflip "
+            f"-c:a copy {flipped_vid_path_out}"
+        )
+        subprocess.call(hflip_command, shell=True)
