@@ -175,39 +175,8 @@ if __name__ == '__main__':
     ax.scatter(p3d[:, 0], p3d[:, 1], p3d[:, 2], c='black', s=100)
     connect_all(ax, p3d, scheme, bodyparts)
 
-    # anipose
+    # anipose vidnames
     # vidnames = [['calib-charuco-camA.MOV'],
     # ['calib-charuco-camB.MOV'],
     # ['calib-charuco-camC.MOV']]
 
-    # skilled reaching front
-    # vid_path = 'C:\Users\haydenjs\Desktop
-    # nothing
-
-    # skilled reaching overhead (R0452)
-    # vid_path = 'C:\Users\haydenjs\Desktop
-    # cam 00, 'cam00_sr_overhead.mov', 0/199
-    # cam 01, 'cam01_sr_overhead.mov', 0/230
-    # cam 02, 'cam02_sr_overhead.mov', 2/234
-    # cam 03, 'cam03_sr_overhead.mov', 25/218
-
-    # pavlovian overhead
-    # vid_path = 'C:\Users\haydenjs\Desktop\overhead_calibration_videos'
-    # cam 00, 'cam00_pav_overhead.mov', 93/195
-    # cam 01, 'cam01_pav_overhead.mov', 3/204
-    # cam 02, 'cam02_pav_overhead.mov', 141/180
-    # cam 03, 'cam03_pav_overhead.mov', 160/170
-
-    # my front videos
-    # vid_path = 'C:\Users\haydenjs\Desktop\calibration_samples_for_Hayden'
-    # 'hayden_front_1.avi', 220/400
-    # 'hayden_front_1_left.mov', 0
-    # 'hayden_front_1_center.mov', 10
-    # 'hayden_front_1_right.mov', 0
-
-    # 'hayden_front_2.avi', 288/400
-    # 'hayden_front_2_left.mov', 0
-    # 'hayden_front_2_center.mov', 77
-    # 'hayden_front_2_right.mov', 0
-
-    # 'hayden_front_3.avi', 0/400
