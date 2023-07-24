@@ -1,3 +1,5 @@
+# unedited version of cameras.py by anipose
+
 import cv2
 import numpy as np
 from copy import copy
