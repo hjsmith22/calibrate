@@ -1,3 +1,5 @@
+# unedited version of boards.py by anipose
+
 import cv2
 import numpy as np
 from abc import ABC, abstractmethod
