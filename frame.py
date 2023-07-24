@@ -1,3 +1,5 @@
+# unedited copy of frame.py by anipose
+
 """
 DataFrame
 ---------
