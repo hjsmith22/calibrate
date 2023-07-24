@@ -1,4 +1,4 @@
-# unedited version of utils.py from anipose
+# unedited version of utils.py by anipose
 
 import cv2
 import numpy as np
