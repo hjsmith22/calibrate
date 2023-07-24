@@ -1,3 +1,5 @@
+# add to the end of Dan's crop_videos.py
+
     if view_name != 'direct':
         # flip the video we just wrote out horizontally, give it a new name with "_flipped" at the end
         # temporarily removes the video's file extension
